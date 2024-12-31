@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { FiCopy, FiCheck } from 'react-icons/fi';
 
 const TranscriptExtractor = () => {
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setCopySuccess(false);
 
     try {
       const response = await axios.post('http://localhost:5000/api/transcript/extract', {
@@ -21,6 +24,18 @@ const TranscriptExtractor = () => {
       setError(error.response?.data?.error || 'Something went wrong');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyTranscript = async () => {
+    try {
+      await navigator.clipboard.writeText(result.transcript);
+      setCopySuccess(true);
+      // Reset copy success message after 2 seconds
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+      setError('Failed to copy transcript');
     }
   };
 
@@ -84,7 +99,20 @@ const TranscriptExtractor = () => {
             </div>
             
             <div className="space-y-2">
-              <h2 className="text-xl font-semibold text-gray-800">Transcript</h2>
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-800">Transcript</h2>
+                <button
+                  onClick={handleCopyTranscript}
+                  className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2"
+                >
+                  {copySuccess ? (
+                    <FiCheck className="h-4 w-4" />
+                  ) : (
+                    <FiCopy className="h-4 w-4" />
+                  )}
+                  <span>{copySuccess ? 'Copied!' : 'Copy Transcript'}</span>
+                </button>
+              </div>
               <div className="bg-white p-4 rounded-md shadow max-h-96 overflow-y-auto">
                 <p className="text-gray-600 whitespace-pre-line">
                   {result.transcript}
