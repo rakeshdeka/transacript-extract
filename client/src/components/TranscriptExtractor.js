@@ -14,9 +14,10 @@ const TranscriptExtractor = () => {
     setLoading(true);
     setError(null);
     setCopySuccess(false);
+    // http://localhost:5000
 
     try {
-      const response = await axios.post('http://localhost:5000/api/transcript/extract', {
+      const response = await axios.post('https://transcript-extract.onrender.com/api/transcript/extract', {
         videoUrl: url,
       });
       setResult(response.data);
